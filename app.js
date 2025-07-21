@@ -1,127 +1,90 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { GUI } from 'https://unpkg.com/dat.gui@0.7.9/build/dat.gui.module.js';
+import { orionData } from './data.js';
 
-let scene, camera, renderer, controls;
-let starMeshes = []; // Array to store individual star meshes for click detection
+let scene, camera, renderer, raycaster, controls;
+let overviewCameraPosition;
+let isExploring = false;
+const clickableObjects = [];
+let selectedStar = null;
 
-function init() {
-    // Scene
-    scene = new THREE.Scene();
+let orionStarMeshes = [];
+let orionLineMeshes = [];
 
-    // Camera
-    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.z = 50;
-
-    // Renderer
-    renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(renderer.domElement);
-
-    // Orbit Controls
-    controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.05;
-
-
-    // Starfield Background
-    createStarfield();
-
-    // Random Stars
-    createRandomStars();
-
-    // Raycaster for interaction
-    const raycaster = new THREE.Raycaster();
-    const mouse = new THREE.Vector2();
-
-    window.addEventListener('click', (event) => {
-        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-        mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
-
-        raycaster.setFromCamera(mouse, camera);
-        const intersects = raycaster.intersectObjects(starMeshes);
-
-        if (intersects.length > 0) {
-            console.log('Star clicked!', intersects[0].object);
-            // star information display panel
-        }
+function createOrion() {
+    const group = new THREE.Group();
+    orionStarMeshes = [];
+    orionLineMeshes = [];
+    orionData.stars.forEach((star, i) => {
+        const geometry = new THREE.SphereGeometry(0.4, 32, 32);
+        const material = new THREE.MeshPhongMaterial({ color: 0xffffff, emissive: 0xeeeeff, shininess: 50 });
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.position.set(star.x, star.y, star.z);
+        mesh.userData = { type: 'star', ...star };
+        group.add(mesh);
+        orionStarMeshes.push(mesh);
+        clickableObjects.push(mesh);
     });
-
-    // Handle window resizing
-    window.addEventListener('resize', onWindowResize, false);
-
-    // GUI Controls
-    setupGUI();
-
-    // Start the animation loop
-    animate();
+    const lineMaterial = new THREE.LineBasicMaterial({ color: 0x6688ff, transparent: true, opacity: 0.7 });
+    orionData.connections.forEach(connection => {
+        const points = [
+            orionStarMeshes[connection[0]].position,
+            orionStarMeshes[connection[1]].position
+        ];
+        const geometry = new THREE.BufferGeometry().setFromPoints(points);
+        const line = new THREE.Line(geometry, lineMaterial);
+        group.add(line);
+        orionLineMeshes.push(line);
+    });
+    group.position.set(orionData.position.x, orionData.position.y, orionData.position.z);
+    group.userData = { type: 'constellation', ...orionData };
+    scene.add(group);
+    clickableObjects.push(group);
 }
 
 function createStarfield() {
     const starGeometry = new THREE.BufferGeometry();
-    const starMaterial = new THREE.PointsMaterial({
-        color: 0xffffff,
-        size: 0.1
-    });
-
+    const starMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 0.1 });
     const starVertices = [];
-    for (let i = 0; i < 10000; i++) {
-        const x = (Math.random() - 0.5) * 2000;
-        const y = (Math.random() - 0.5) * 2000;
-        const z = (Math.random() - 0.5) * 2000;
+    for (let i = 0; i < 15000; i++) {
+        const x = THREE.MathUtils.randFloatSpread(2000);
+        const y = THREE.MathUtils.randFloatSpread(2000);
+        const z = THREE.MathUtils.randFloatSpread(2000);
         starVertices.push(x, y, z);
     }
-
     starGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starVertices, 3));
     const starfield = new THREE.Points(starGeometry, starMaterial);
     scene.add(starfield);
 }
 
-function createRandomStars() {
-    const starGeometry = new THREE.SphereGeometry(0.5, 24, 24);
-    const starMaterial = new THREE.MeshBasicMaterial({ color: 0xffff00 });
-
-    for (let i = 0; i < 200; i++) {
-        const star = new THREE.Mesh(starGeometry, starMaterial.clone());
-        star.position.x = (Math.random() - 0.5) * 200;
-        star.position.y = (Math.random() - 0.5) * 200;
-        star.position.z = (Math.random() - 0.5) * 200;
-        scene.add(star);
-        starMeshes.push(star); // Add to array for click detection
-    }
+function init() {
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 2000);
+    camera.position.set(0, 0, 100);
+    overviewCameraPosition = camera.position.clone();
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+    raycaster = new THREE.Raycaster();
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.enabled = false;
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+    scene.add(ambientLight);
+    const pointLight = new THREE.PointLight(0xffffff, 1);
+    camera.add(pointLight);
+    scene.add(camera);
+    createStarfield();
+    createOrion();
+    window.addEventListener('resize', onWindowResize, false);
+    window.addEventListener('click', onClick, false);
+    document.getElementById('back-button').addEventListener('click', onBackButtonClick);
+    animate();
 }
 
-function setupGUI() {
-    const gui = new GUI();
-    const starFolder = gui.addFolder('Stars');
-
-    const params = {
-        showStars: true,
-        starSize: 0.5,
-        backgroundColor: '#000000'
-    };
-
-    starFolder.add(params, 'showStars').onChange((value) => {
-        scene.children.forEach(child => {
-            if (child.geometry && child.geometry.type === 'SphereGeometry') {
-                child.visible = value;
-            }
-        });
-    });
-
-    starFolder.add(params, 'starSize', 0.1, 2).onChange((value) => {
-        scene.children.forEach(child => {
-            if (child.geometry && child.geometry.type === 'SphereGeometry') {
-                child.scale.set(value, value, value);
-            }
-        });
-    });
-
-    gui.addColor(params, 'backgroundColor').onChange((value) => {
-        renderer.setClearColor(value);
-    });
-
-    starFolder.open();
+function animate() {
+    requestAnimationFrame(animate);
+    if (isExploring) controls.update();
+    renderer.render(scene, camera);
 }
 
 function onWindowResize() {
@@ -130,15 +93,106 @@ function onWindowResize() {
     renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
-function animate() {
-    requestAnimationFrame(animate);
-    controls.update();
-    renderer.render(scene, camera);
+function onClick(event) {
+    const mouse = new THREE.Vector2(
+        (event.clientX / window.innerWidth) * 2 - 1,
+        -(event.clientY / window.innerHeight) * 2 + 1
+    );
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObjects(clickableObjects, true);
+    if (intersects.length > 0) {
+        let clickedObject = intersects[0].object;
+        if (!isExploring) {
+            while(clickedObject.parent && clickedObject.userData.type !== 'constellation') {
+                clickedObject = clickedObject.parent;
+            }
+            if (clickedObject.userData.type === 'constellation') {
+                zoomToConstellation(clickedObject);
+            }
+        } else if (isExploring && clickedObject.userData.type === 'star') {
+            if (selectedStar === clickedObject) {
+                hideStarPopup();
+                selectedStar = null;
+            } else {
+                showStarPopup(clickedObject.userData, event);
+                selectedStar = clickedObject;
+            }
+        }
+    } else {
+        hideStarPopup();
+        selectedStar = null;
+    }
 }
 
-// need to add star data with names, distances, spectral types
-// need to mplement star information panel on click
-// need to add constellation lines
-// try to optimize with instanced meshes for better performance
+function zoomToConstellation(constellation) {
+    isExploring = true;
+    const targetPosition = constellation.position.clone().add(new THREE.Vector3(0, 0, 35));
+    const targetLookAt = constellation.position.clone();
+    const startPosition = camera.position.clone();
+    const duration = 1500;
+    let startTime = null;
+    function animationStep(timestamp) {
+        if (!startTime) startTime = timestamp;
+        const progress = Math.min((timestamp - startTime) / duration, 1);
+        camera.position.lerpVectors(startPosition, targetPosition, progress);
+        camera.lookAt(targetLookAt);
+        if (progress < 1) {
+            requestAnimationFrame(animationStep);
+        } else {
+            controls.enabled = true;
+            controls.target.copy(targetLookAt);
+            showInfoPanel(constellation.userData);
+        }
+    }
+    requestAnimationFrame(animationStep);
+}
+
+function showInfoPanel(data) {
+    document.getElementById('constellation-name').innerText = data.name;
+    document.getElementById('constellation-info').innerHTML = data.info;
+    document.getElementById('info-panel').style.display = 'block';
+    document.getElementById('back-button').style.display = 'block';
+}
+
+function hideInfoPanel() {
+    document.getElementById('info-panel').style.display = 'none';
+    document.getElementById('back-button').style.display = 'none';
+    document.getElementById('star-popup').style.display = 'none';
+}
+
+function showStarPopup(data, event) {
+    const popup = document.getElementById('star-popup');
+    document.getElementById('star-name').innerText = data.name;
+    document.getElementById('star-brightness').innerText = data.brightness;
+    document.getElementById('star-distance').innerText = data.distance;
+    popup.style.display = 'block';
+    popup.style.left = `${event.clientX + 10}px`;
+    popup.style.top = `${event.clientY + 10}px`;
+}
+
+function hideStarPopup() {
+    document.getElementById('star-popup').style.display = 'none';
+}
+
+function onBackButtonClick() {
+    isExploring = false;
+    controls.enabled = false;
+    hideInfoPanel();
+    const startPosition = camera.position.clone();
+    const startLookAt = controls.target.clone();
+    const duration = 1500;
+    let startTime = null;
+    function animationStep(timestamp) {
+        if (!startTime) startTime = timestamp;
+        const progress = Math.min((timestamp - startTime) / duration, 1);
+        camera.position.lerpVectors(startPosition, overviewCameraPosition, progress);
+        const lookAtTarget = new THREE.Vector3().lerpVectors(startLookAt, new THREE.Vector3(0, 0, 0), progress);
+        camera.lookAt(lookAtTarget);
+        if (progress < 1) {
+            requestAnimationFrame(animationStep);
+        }
+    }
+    requestAnimationFrame(animationStep);
+}
 
 init(); 
