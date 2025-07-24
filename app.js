@@ -298,12 +298,16 @@ function onBackButtonClick() {
         } else {
             animateBigDipperZ(false);
             animateCassiopeiaZ(false);
+            controls.target.set(0, 0, 0);
+            controls.update();
         }
     }
     requestAnimationFrame(animationStep);
 }
 
 function zoomToConstellation(constellation) {
+    controls.target.copy(constellation.position);
+    controls.update();
     isExploring = true;
     const targetPosition = constellation.position.clone().add(new THREE.Vector3(0, 0, 35));
     const targetLookAt = constellation.position.clone();
