@@ -7,6 +7,35 @@
     <style>
         body { margin: 0; overflow: hidden; background-color: #000; }
         canvas { display: block; }
+        @import url('https://fonts.googleapis.com/css2?family=Creepster&display=swap');
+        #overview-header {
+            position: absolute;
+            top: 150px;
+            left: 0;
+            width: 100vw;
+            text-align: center;
+            color: #fff;
+            font-size: 4rem;
+            font-family: 'Rajdhani', 'Audiowide', 'Orbitron', 'Segoe UI', Arial, sans-serif;
+            font-weight: 400;
+            letter-spacing: 0.18em;
+            background: linear-gradient(90deg, #ff00ff 0%, #00ffff 50%, #ff0080 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow:
+                0 0 4px #fff,
+                0 0 12px #ff00ff,
+                0 0 20px #00ffff,
+                0 0 28px #ff0080,
+                1px 1px 0 #fff,
+                -1px -1px 0 #fff;
+            filter: drop-shadow(0 0 4px #00ffff);
+            z-index: 10;
+            pointer-events: none;
+            user-select: none;
+            padding: 24px 0 18px 0;
+        }
         #info-panel {
             position: absolute;
             top: 20px;
@@ -47,6 +76,8 @@
     </style>
 </head>
 <body>
+
+<div id="overview-header" style="font-family: 'Creepster', cursive !important; font-size: 5rem !important;">Constellation Explorer</div>
 
 <div id="info-panel">
     <h2 id="constellation-name"></h2>

@@ -151,9 +151,11 @@ function init() {
 
 function animate() {
     requestAnimationFrame(animate);
+    
     if (isExploring) controls.update();
     updateBigDipperLines();
     updateCassiopeiaLines();
+    
     renderer.render(scene, camera);
 }
 
@@ -300,12 +302,14 @@ function onBackButtonClick() {
             animateCassiopeiaZ(false);
             controls.target.set(0, 0, 0);
             controls.update();
+            document.getElementById('overview-header').style.display = 'block';
         }
     }
     requestAnimationFrame(animationStep);
 }
 
 function zoomToConstellation(constellation) {
+    document.getElementById('overview-header').style.display = 'none';
     controls.target.copy(constellation.position);
     controls.update();
     isExploring = true;
