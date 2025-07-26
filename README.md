@@ -1,6 +1,8 @@
 # Constellation Explorer
 
-An interactive 3D constellation explorer built with JavaScript, HTML, and CSS. Features real astronomical data and star animations. Explore Orion, the Big Dipper, and Cassiopeia with smooth zooms, orbitals, and detailed star information.
+An interactive 3D constellation explorer built with JavaScript, HTML, and CSS. Showcases real astronomical data with animated stars and immersive effects. 
+
+Explore Orion, the Big Dipper, and Cassiopeia using intuitive camera controls, orbital navigation, and star details.
 
 More Constellations and UI/UX updates to come!
 
