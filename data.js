@@ -44,7 +44,7 @@ export const bigDipperData = {
 export const cassiopeiaData = {
     name: "Cassiopeia",
     info: "Cassiopeia is a prominent constellation in the northern sky, easily recognizable for its distinctive 'W' shape formed by five bright stars.",
-    position: { x: 75, y: -30, z: 0 },
+    position: { x: 55, y: -30, z: 0 },
     stars: [
         { name: "Schedar",    x: 0*1.5,   y: 0*1.5,   z: 0*1.5, z3d: ((55-228)/20) + 0.2, brightness: 2.2, distance: "228 ly" },
         { name: "Caph",      x: 4*1.5,   y: 3*1.5,   z: 0*1.5, z3d: ((55-55)/20) + -0.5, brightness: 2.3, distance: "55 ly" },

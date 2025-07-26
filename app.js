@@ -7,6 +7,7 @@ let overviewCameraPosition;
 let isExploring = false;
 const clickableObjects = [];
 let selectedStar = null;
+let time = 0;
 
 let orionStarMeshes = [];
 let orionLineMeshes = [];
@@ -151,10 +152,29 @@ function init() {
 
 function animate() {
     requestAnimationFrame(animate);
+    time += 0.016;
     
     if (isExploring) controls.update();
     updateBigDipperLines();
     updateCassiopeiaLines();
+    
+    orionStarMeshes.forEach(mesh => {
+        const shimmer = Math.sin(time * 3 + mesh.position.x * 0.5) * 0.3 + 0.7;
+        mesh.material.emissiveIntensity = shimmer;
+        mesh.scale.setScalar(0.8 + shimmer * 0.4);
+    });
+    
+    bigDipperStarMeshes.forEach(mesh => {
+        const shimmer = Math.sin(time * 2.5 + mesh.position.x * 0.3) * 0.4 + 0.6;
+        mesh.material.emissiveIntensity = shimmer;
+        mesh.scale.setScalar(0.7 + shimmer * 0.5);
+    });
+    
+    cassiopeiaStarMeshes.forEach(mesh => {
+        const shimmer = Math.sin(time * 3.5 + mesh.position.x * 0.4) * 0.35 + 0.65;
+        mesh.material.emissiveIntensity = shimmer;
+        mesh.scale.setScalar(0.75 + shimmer * 0.45);
+    });
     
     renderer.render(scene, camera);
 }
