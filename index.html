@@ -1,97 +1,38 @@
+<!-- 
+Constellation Explorer - Main HTML file
+Contains the UI structure, styling, and Three.js canvas setup
+-->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Constellation Explorer</title>
-    <style>
-        body { margin: 0; overflow: hidden; background-color: #000; }
-        canvas { display: block; }
-        @import url('https://fonts.googleapis.com/css2?family=Creepster&display=swap');
-        #overview-header {
-            position: absolute;
-            top: 150px;
-            left: 0;
-            width: 100vw;
-            text-align: center;
-            color: #fff;
-            font-size: 4rem;
-            font-family: 'Rajdhani', 'Audiowide', 'Orbitron', 'Segoe UI', Arial, sans-serif;
-            font-weight: 400;
-            letter-spacing: 0.18em;
-            background: linear-gradient(90deg, #ff00ff 0%, #00ffff 50%, #ff0080 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow:
-                0 0 4px #fff,
-                0 0 12px #ff00ff,
-                0 0 20px #00ffff,
-                0 0 28px #ff0080,
-                1px 1px 0 #fff,
-                -1px -1px 0 #fff;
-            filter: drop-shadow(0 0 4px #00ffff);
-            z-index: 10;
-            pointer-events: none;
-            user-select: none;
-            padding: 24px 0 18px 0;
-        }
-        #info-panel {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background-color: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 15px;
-            border-radius: 5px;
-            display: none;
-            max-width: 400px;
-            font-family: sans-serif;
-            overflow-wrap: break-word;
-            word-break: break-word;
-        }
-        #info-panel h2 { margin-top: 0; }
-        #back-button {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            padding: 10px 15px;
-            background-color: #333;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            display: none;
-        }
-        #star-popup {
-            position: absolute;
-            background-color: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 10px;
-            border-radius: 5px;
-            display: none;
-            pointer-events: none;
-            font-family: sans-serif;
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-<div id="overview-header" style="font-family: 'Creepster', cursive !important; font-size: 5rem !important;">Constellation Explorer</div>
+<!-- Main title that disappears when zooming in -->
+<div id="overview-header">Constellation Explorer</div>
 
+<!-- Constellation info panel -->
 <div id="info-panel">
     <h2 id="constellation-name"></h2>
     <p id="constellation-info"></p>
 </div>
 
+<!-- Navigation back to overview -->
 <button id="back-button">Back to Overview</button>
 
+<!-- Star details popup -->
 <div id="star-popup">
     <div id="star-name"></div>
     <div>Brightness: <span id="star-brightness"></span></div>
     <div>Distance: <span id="star-distance"></span></div>
 </div>
 
+<!-- Three.js module imports -->
 <script type="importmap">
     {
         "imports": {

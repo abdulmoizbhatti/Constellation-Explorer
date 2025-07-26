@@ -1,9 +1,95 @@
-body {
-    margin: 0;
-    overflow: hidden;
-    background-color: #000;
+/*
+Main CSS file
+Contains all styling for the constellation explorer interface
+*/
+
+/* Reset body margins and set black background for space theme */
+body { 
+    margin: 0; 
+    overflow: hidden; 
+    background-color: #000; 
 }
 
-canvas {
-    display: block;
+/* Ensure Three.js canvas displays properly */
+canvas { 
+    display: block; 
+}
+
+/* Import Google Fonts for the header */
+@import url('https://fonts.googleapis.com/css2?family=Creepster&display=swap');
+
+/* Main header styling with spacey gradient and glow effects */
+#overview-header {
+    position: absolute;
+    top: 150px;
+    left: 0;
+    width: 100vw;
+    text-align: center;
+    color: #fff;
+    font-size: 5rem;
+    font-family: 'Creepster', cursive !important;
+    font-weight: 400;
+    letter-spacing: 0.18em;
+    background: linear-gradient(90deg, #ff00ff 0%, #00ffff 50%, #ff0080 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow:
+        0 0 4px #fff,
+        0 0 12px #ff00ff,
+        0 0 20px #00ffff,
+        0 0 28px #ff0080,
+        1px 1px 0 #fff,
+        -1px -1px 0 #fff;
+    filter: drop-shadow(0 0 4px #00ffff);
+    z-index: 10;
+    pointer-events: none;
+    user-select: none;
+    padding: 24px 0 18px 0;
+}
+
+/* Info panel for constellation details */
+#info-panel {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 15px;
+    border-radius: 5px;
+    display: none;
+    max-width: 400px;
+    font-family: sans-serif;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+
+#info-panel h2 { 
+    margin-top: 0; 
+}
+
+/* Back button for returning to overview */
+#back-button {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    padding: 10px 15px;
+    background-color: #333;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    display: none;
+}
+
+/* Star info popup styling */
+#star-popup {
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    display: none;
+    pointer-events: none;
+    font-family: sans-serif;
 } 

@@ -1,3 +1,8 @@
+/*
+Main application logic
+Handles setup, rendering, user interactions, and animations
+*/
+
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { orionData, bigDipperData, cassiopeiaData } from './data.js';
@@ -16,6 +21,7 @@ let bigDipperLineMeshes = [];
 let cassiopeiaStarMeshes = [];
 let cassiopeiaLineMeshes = [];
 
+// Creates Orion constellation with stars and connecting lines
 function createOrion() {
     const group = new THREE.Group();
     orionStarMeshes = [];
@@ -47,6 +53,7 @@ function createOrion() {
     clickableObjects.push(group);
 }
 
+// Creates Big Dipper with yellow/gold styling
 function createBigDipper() {
     const group = new THREE.Group();
     bigDipperStarMeshes = [];
@@ -78,13 +85,14 @@ function createBigDipper() {
     clickableObjects.push(group);
 }
 
+// Creates Cassiopeia with white stars and purple lines
 function createCassiopeia() {
     const group = new THREE.Group();
     cassiopeiaStarMeshes = [];
     cassiopeiaLineMeshes = [];
     cassiopeiaData.stars.forEach((star, i) => {
         const geometry = new THREE.SphereGeometry(0.4, 32, 32);
-        const material = new THREE.MeshPhongMaterial({ color: 0xffffff, emissive: 0xe6e6ff, shininess: 80 }); // more white
+        const material = new THREE.MeshPhongMaterial({ color: 0xffffff, emissive: 0xe6e6ff, shininess: 80 });
         const mesh = new THREE.Mesh(geometry, material);
         mesh.position.set(star.x, star.y, star.z);
         mesh.userData = { type: 'star', ...star };
@@ -92,7 +100,7 @@ function createCassiopeia() {
         cassiopeiaStarMeshes.push(mesh);
         clickableObjects.push(mesh);
     });
-    const lineMaterial = new THREE.LineBasicMaterial({ color: 0xd580ff, transparent: true, opacity: 0.85 }); // more vibrant purple
+    const lineMaterial = new THREE.LineBasicMaterial({ color: 0xd580ff, transparent: true, opacity: 0.85 });
     cassiopeiaData.connections.forEach(connection => {
         const points = [
             cassiopeiaStarMeshes[connection[0]].position,
@@ -109,6 +117,7 @@ function createCassiopeia() {
     clickableObjects.push(group);
 }
 
+// Creates background starfield with random stars
 function createStarfield() {
     const starGeometry = new THREE.BufferGeometry();
     const starMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 0.1 });
@@ -124,6 +133,7 @@ function createStarfield() {
     scene.add(starfield);
 }
 
+// Initialize Three.js scene, camera, and controls
 function init() {
     scene = new THREE.Scene();
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 2000);
@@ -150,6 +160,7 @@ function init() {
     animate();
 }
 
+// Main animation loop with star shimmering effects
 function animate() {
     requestAnimationFrame(animate);
     time += 0.016;
@@ -158,6 +169,7 @@ function animate() {
     updateBigDipperLines();
     updateCassiopeiaLines();
     
+    // Star shimmering animations for each constellation
     orionStarMeshes.forEach(mesh => {
         const shimmer = Math.sin(time * 3 + mesh.position.x * 0.5) * 0.3 + 0.7;
         mesh.material.emissiveIntensity = shimmer;
@@ -185,6 +197,7 @@ function onWindowResize() {
     renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
+// Handle mouse clicks for constellation and star interactions
 function onClick(event) {
     const mouse = new THREE.Vector2(
         (event.clientX / window.innerWidth) * 2 - 1,
@@ -216,6 +229,7 @@ function onClick(event) {
     }
 }
 
+// Animate Big Dipper stars between 2D and 3D positions
 function animateBigDipperZ(to3D, duration = 1000) {
     if (!bigDipperStarMeshes || !bigDipperStarMeshes.length) return;
     const startZs = bigDipperStarMeshes.map(mesh => mesh.position.z);
@@ -234,6 +248,7 @@ function animateBigDipperZ(to3D, duration = 1000) {
     requestAnimationFrame(step);
 }
 
+// Update Big Dipper line positions to follow star movements
 function updateBigDipperLines() {
     if (!bigDipperLineMeshes || !bigDipperLineMeshes.length) return;
     bigDipperData.connections.forEach((connection, i) => {
@@ -245,6 +260,7 @@ function updateBigDipperLines() {
     });
 }
 
+// Animate Cassiopeia stars between 2D and 3D positions
 function animateCassiopeiaZ(to3D, duration = 1000) {
     if (!cassiopeiaStarMeshes || !cassiopeiaStarMeshes.length) return;
     const startZs = cassiopeiaStarMeshes.map(mesh => mesh.position.z);
@@ -263,6 +279,7 @@ function animateCassiopeiaZ(to3D, duration = 1000) {
     requestAnimationFrame(step);
 }
 
+// Update Cassiopeia line positions to follow star movements
 function updateCassiopeiaLines() {
     if (!cassiopeiaLineMeshes || !cassiopeiaLineMeshes.length) return;
     cassiopeiaData.connections.forEach((connection, i) => {
@@ -274,6 +291,7 @@ function updateCassiopeiaLines() {
     });
 }
 
+// Show constellation info panel
 function showInfoPanel(data) {
     document.getElementById('constellation-name').innerText = data.name;
     document.getElementById('constellation-info').innerHTML = data.info;
@@ -281,12 +299,14 @@ function showInfoPanel(data) {
     document.getElementById('back-button').style.display = 'block';
 }
 
+// Hide info panel and reset UI
 function hideInfoPanel() {
     document.getElementById('info-panel').style.display = 'none';
     document.getElementById('back-button').style.display = 'none';
     document.getElementById('star-popup').style.display = 'none';
 }
 
+// Show star information popup
 function showStarPopup(data, event) {
     const popup = document.getElementById('star-popup');
     document.getElementById('star-name').innerText = data.name;
@@ -301,6 +321,7 @@ function hideStarPopup() {
     document.getElementById('star-popup').style.display = 'none';
 }
 
+// Return to overview button
 function onBackButtonClick() {
     isExploring = false;
     controls.enabled = false;
@@ -328,6 +349,7 @@ function onBackButtonClick() {
     requestAnimationFrame(animationStep);
 }
 
+// Zoom into selected constellation
 function zoomToConstellation(constellation) {
     document.getElementById('overview-header').style.display = 'none';
     controls.target.copy(constellation.position);
